@@ -14,7 +14,7 @@ var clothesTabButton = document.getElementById("clothes-tab-button");
 var sceneTabButton = document.getElementById("scene-tab-button");
 var saveTabButton = document.getElementById("save-tab-button");
 
-bodyTabContent.style.display = "block";
+bodyTabContent.style.display = "flex";
 eyesTabContent.style.display = "none";
 noseTabContent.style.display = "none";
 mouthTabContent.style.display = "none";
@@ -24,43 +24,43 @@ saveTabContent.style.display = "none";
 
 bodyTabButton.addEventListener('click', function() {
     hideAllTabs();
-    bodyTabContent.style.display = "block";
+    bodyTabContent.style.display = "flex";
     bodyTabButton.style.backgroundColor = "red";
 });
 
 eyesTabButton.addEventListener('click', function() {
     hideAllTabs();
-    eyesTabContent.style.display = "block";
+    eyesTabContent.style.display = "flex";
     eyesTabButton.style.backgroundColor = "red";
 });
 
 noseTabButton.addEventListener('click', function() {
     hideAllTabs();
-    noseTabContent.style.display = "block";
+    noseTabContent.style.display = "flex";
     noseTabButton.style.backgroundColor = "red";
 });
 
 mouthTabButton.addEventListener('click', function() {
     hideAllTabs();
-    mouthTabContent.style.display = "block";
+    mouthTabContent.style.display = "flex";
     mouthTabButton.style.backgroundColor = "red";
 });
 
 clothesTabButton.addEventListener('click', function() {
     hideAllTabs();
-    clothesTabContent.style.display = "block";
+    clothesTabContent.style.display = "flex";
     clothesTabButton.style.backgroundColor = "red";
 });
 
 sceneTabButton.addEventListener('click', function() {
     hideAllTabs();
-    sceneTabContent.style.display = "block";
+    sceneTabContent.style.display = "flex";
     sceneTabButton.style.backgroundColor = "red";
 });
 
 saveTabButton.addEventListener('click', function() {
     hideAllTabs();
-    saveTabContent.style.display = "block";
+    saveTabContent.style.display = "flex";
     saveTabButton.style.backgroundColor = "red";
 });
 

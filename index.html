@@ -15,6 +15,8 @@
   <body>
     <div id="app-container">
         <canvas id="renderer-canvas"></canvas>
+        <script type="module" src="/src/main.js"></script>
+        <script type="module" src="/src/uicontrols.js"></script>
         <div id="game-controls">
             <div class="tab-container">
                 <div id="body-tab-button" class="tab">
@@ -40,65 +42,91 @@
                 </div>
             </div>
             <div class="tab-content" id="body-controls">
-                <div class="character-attribute-control-container">
-                    <p>BODY COLOR R</p>
-                    <input value="0" type="range" id="bodyColorR" />
-                    <p id="body-color-r-value"></p>
-                </div>
-                <div class="character-attribute-control-container">
-                    <p>BODY COLOR G</p>
-                    <input value="0" type="range" id="bodyColorG" />
-                    <p id="body-color-g-value"></p>
-                </div>
-                <div class="character-attribute-control-container">
-                    <p>BODY COLOR B</p>
-                    <input value="0" type="range" id="bodyColorB" />
-                    <p id="body-color-b-value"></p>
+                <div class="col">
+                    <div class="character-attribute-control-container">
+                        <p>BODY COLOR R</p>
+                        <input value="0" type="range" id="bodyColorR" />
+                        <p id="body-color-r-value"></p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>BODY COLOR G</p>
+                        <input value="0" type="range" id="bodyColorG" />
+                        <p id="body-color-g-value"></p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>BODY COLOR B</p>
+                        <input value="0" type="range" id="bodyColorB" />
+                        <p id="body-color-b-value"></p>
+                    </div>
                 </div>
             </div>
             <div class="tab-content" id="eye-controls">
-                <div class="character-attribute-control-container">
-                    <p>EYE SIZE</p>
-                    <input value="0" type="range" id="eyeSizeInput" />
-                    <p id="eye-size-value">0</p>
+                <div class="col">
+                    <div class="character-attribute-control-container">
+                        <p>EYE SIZE</p>
+                        <input value="0" type="range" id="eyeSizeInput" />
+                        <p id="eye-size-value">0</p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>EYES Y</p>
+                        <input value="0" type="range" id="eyesYInput" />
+                        <p id="eye-y-value">0</p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>DISTANCE APART</p>
+                        <input value="0" type="range" id="eyeDistApartInput" min="0" max="25" />
+                        <p id="eye-dist-apart-value">0</p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>EYE TILT</p>
+                        <input value="0" type="range" id="eyeTiltInput" />
+                        <p id="eye-tilt-value">0</p>
+                    </div>
                 </div>
-                <div class="character-attribute-control-container">
-                    <p>EYES Y</p>
-                    <input value="0" type="range" id="eyesYInput" />
-                    <p id="eye-y-value">0</p>
-                </div>
-                <div class="character-attribute-control-container">
-                    <p>DISTANCE APART</p>
-                    <input value="0" type="range" id="eyeDistApartInput" min="0" max="25" />
-                    <p id="eye-dist-apart-value">0</p>
-                </div>
-                <div class="character-attribute-control-container">
-                    <p>EYE TILT</p>
-                    <input value="0" type="range" id="eyeTiltInput" />
-                    <p id="eye-tilt-value">0</p>
+                <div id="eye-selection-container" class="col">
+                    <div class="eyeTextureOption textureOption">
+                        <img src="/planetx1.png" />
+                    </div>
+                    <div class="eyeTextureOption textureOption">
+                        <img src="/eyes2.png" />
+                    </div>
+                    <div class="eyeTextureOption textureOption">
+                        <img src="/noneOption.png" />
+                    </div>
                 </div>
             </div>
             <div class="tab-content" id="nose-controls">
-                <div class="character-attribute-control-container">
-                    <p>NOSE SIZE</p>
-                    <input value="0" type="range" id="noseSizeInput" />
-                    <p id="nose-size-value">0</p>
+                <div class="col">
+                    <div class="character-attribute-control-container">
+                        <p>NOSE SIZE</p>
+                        <input value="0" type="range" id="noseSizeInput" />
+                        <p id="nose-size-value">0</p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>NOSE Y</p>
+                        <input value="0" type="range" id="noseYInput" />
+                        <p id="nose-y-value">0</p>
+                    </div>
                 </div>
-                <div class="character-attribute-control-container">
-                    <p>NOSE Y</p>
-                    <input value="0" type="range" id="noseYInput" />
-                    <p id="nose-y-value">0</p>
-                </div>            </div>
+                <div class="col">
+
+                </div>
+            </div>
             <div class="tab-content" id="mouth-controls">
-                <div class="character-attribute-control-container">
-                    <p>MOUTH SIZE</p>
-                    <input value="0" type="range" id="mouthSizeInput" />
-                    <p id="mouth-size-value">0</p>
+                <div class="col">
+                    <div class="character-attribute-control-container">
+                        <p>MOUTH SIZE</p>
+                        <input value="0" type="range" id="mouthSizeInput" />
+                        <p id="mouth-size-value">0</p>
+                    </div>
+                    <div class="character-attribute-control-container">
+                        <p>MOUTH Y</p>
+                        <input value="0" type="range" id="mouthYInput" />
+                        <p id="mouth-y-value">0</p>
+                    </div>
                 </div>
-                <div class="character-attribute-control-container">
-                    <p>MOUTH Y</p>
-                    <input value="0" type="range" id="mouthYInput" />
-                    <p id="mouth-y-value">0</p>
+                <div class="col">
+
                 </div>
             </div>
             <div class="tab-content" id="clothes-controls">
@@ -112,7 +140,5 @@
             </div>
         </div>
     </div>
-    <script type="module" src="/src/main.js"></script>
-    <script type="module" src="/src/uicontrols.js"></script>
   </body>
 </html>

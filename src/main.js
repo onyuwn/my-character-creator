@@ -335,3 +335,18 @@ clothesTabButton.addEventListener("click",  function() {
     camera.position.y = personShirtPosition.y;
     camera.position.z = personShirtPosition.z + 3.5;
 });
+
+const updateTexture = (bodyPart, txPath) => {
+    var newTexture = new THREE.TextureLoader().load(txPath);
+    
+    if(bodyPart == 'eyes') {
+        smileyMat.map = newTexture;
+    }
+}
+
+document.querySelectorAll('.eyeTextureOption').forEach(el => {
+    el.addEventListener('click', () => {
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      updateTexture('eyes', textureFile);
+    });
+  });
