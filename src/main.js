@@ -341,6 +341,10 @@ const updateTexture = (bodyPart, txPath) => {
     
     if(bodyPart == 'eyes') {
         smileyMat.map = newTexture;
+    } else if(bodyPart == 'nose') {
+        noseMat.map = newTexture;
+    } else if(bodyPart == 'mouth') {
+        mouthMat.map = newTexture;
     }
 }
 
@@ -349,4 +353,18 @@ document.querySelectorAll('.eyeTextureOption').forEach(el => {
       const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
       updateTexture('eyes', textureFile);
     });
-  });
+});
+
+document.querySelectorAll('.noseTextureOption').forEach(el => {
+    el.addEventListener('click', () => {
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      updateTexture('nose', textureFile);
+    });
+});
+
+document.querySelectorAll('.mouthTextureOption').forEach(el => {
+    el.addEventListener('click', () => {
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      updateTexture('mouth', textureFile);
+    });
+});

@@ -69,7 +69,7 @@
                     </div>
                     <div class="character-attribute-control-container">
                         <p>EYES Y</p>
-                        <input value="0" type="range" id="eyesYInput" />
+                        <input value="0" min="-10" max="25" type="range" id="eyesYInput" />
                         <p id="eye-y-value">0</p>
                     </div>
                     <div class="character-attribute-control-container">
@@ -104,12 +104,20 @@
                     </div>
                     <div class="character-attribute-control-container">
                         <p>NOSE Y</p>
-                        <input value="0" type="range" id="noseYInput" />
+                        <input value="0" min="-10" max="25" type="range" id="noseYInput" />
                         <p id="nose-y-value">0</p>
                     </div>
                 </div>
-                <div class="col">
-
+                <div id="nose-selection-container" class="col">
+                    <div class="noseTextureOption textureOption">
+                        <img src="/nose1.png" />
+                    </div>
+                    <div class="noseTextureOption textureOption">
+                        <img src="/nose2.png" />
+                    </div>
+                    <div class="noseTextureOption textureOption">
+                        <img src="/noneOption.png" />
+                    </div>
                 </div>
             </div>
             <div class="tab-content" id="mouth-controls">
@@ -121,12 +129,20 @@
                     </div>
                     <div class="character-attribute-control-container">
                         <p>MOUTH Y</p>
-                        <input value="0" type="range" id="mouthYInput" />
+                        <input value="0" type="range" min="-10" max="25" id="mouthYInput" />
                         <p id="mouth-y-value">0</p>
                     </div>
                 </div>
-                <div class="col">
-
+                <div id="mouth-selection-container" class="col">
+                    <div class="mouthTextureOption textureOption">
+                        <img src="/mouthtx1.png" />
+                    </div>
+                    <div class="mouthTextureOption textureOption">
+                        <img src="/mouth2.png" />
+                    </div>
+                    <div class="mouthTextureOption textureOption">
+                        <img src="/noneOption.png" />
+                    </div>
                 </div>
             </div>
             <div class="tab-content" id="clothes-controls">
