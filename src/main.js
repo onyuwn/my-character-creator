@@ -9,6 +9,7 @@ var rendererWScale = 3;
 var rendererHScale = 1;
 var rendererWidth = window.innerWidth / rendererWScale;
 var rendererHeight = window.innerHeight / rendererHScale;
+var mouseX = 0;
 
 var bodyTabButton = document.getElementById("body-tab-button");
 var eyesTabButton = document.getElementById("eyes-tab-button");
@@ -23,7 +24,7 @@ const baseEyeDistApart = .05;
 const baseEyeYPos = -.1;
 const baseEyeTilt = 0.0;
 const baseNoseYPos = 0.0;
-const baseNoseSize = 1.0;
+const baseNoseSize = 0.0;
 const baseMouthYPos = 0.0;
 const baseMouthSize = 0.0;
 
@@ -34,10 +35,11 @@ camera.position.z = 5;
 const defaultPos = new THREE.Vector3(0.0, 0.0, 5.0);
 const mouthPos = new THREE.Vector3(0.0, 0.0, 0.0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+var rendererCanvas = document.getElementById("renderer-canvas");
+const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: rendererCanvas });
 renderer.setSize(rendererWidth, rendererHeight);
 var appContainer = document.getElementById("app-container");
-appContainer.insertBefore(renderer.domElement, appContainer.firstChild);
+//appContainer.insertBefore(renderer.domElement, appContainer.firstChild);
 
 // const geometry = new THREE.BoxGeometry();
 // const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
@@ -55,12 +57,12 @@ const eyeLeft = new THREE.Mesh(geometry, smileyMat);
 const eyeRight = new THREE.Mesh(geometry, smileyMat);
 const mouth = new THREE.Mesh(geometry, mouthMat);
 const nose = new THREE.Mesh(geometry, noseMat);
+var trackingMouse = false;
 eyeLeft.rotation.y = THREE.MathUtils.degToRad(180)
 scene.add(eyeLeft);
 scene.add(eyeRight);
 scene.add(mouth);
 scene.add(nose);
-
 
 eyeLeft.scale.set(baseEyeSize, baseEyeSize, baseEyeSize);
 eyeRight.scale.set(baseEyeSize, baseEyeSize, baseEyeSize);
@@ -183,21 +185,42 @@ eyeTiltSlider.oninput = function() {
 mouthSizeSlider.addEventListener('input', function() {
     var newSize = baseMouthSize + (this.value * .01);
     mouth.scale.set(newSize, newSize, newSize);
+    document.getElementById("mouth-size-value").innerHTML = newSize;
 });
 
 mouthYSlider.addEventListener('input', function() {
     var newHeight = baseMouthYPos + (this.value * .01);
     mouth.position.y = personMouthPosition.y + newHeight;
+    document.getElementById("mouth-y-value").innerHTML = newHeight;
 });
 
 noseSizeSlider.addEventListener('input', function() {
     var newSize = baseNoseSize + (this.value * .01);
     nose.scale.set(newSize, newSize, newSize);
+    document.getElementById("nose-size-value").innerHTML = newSize;
 });
 
 noseYSlider.addEventListener('input', function() {
     var newHeight = baseNoseYPos + (this.value * .01)
     nose.position.y = personNosePosition.y + newHeight;
+    document.getElementById("nose-y-value").innerHTML = newHeight;
+});
+
+rendererCanvas.addEventListener('mouseenter', function() {
+    // personModel.attach(nose);
+    // personModel.attach(eyeLeft);
+    // personModel.attach(eyeRight);
+    // personModel.attach(mouth);
+    trackingMouse = true;
+});
+
+rendererCanvas.addEventListener('mouseleave', function() {
+    trackingMouse = false;
+    personModel.rotation.y = THREE.MathUtils.degToRad(-90);
+});
+
+document.addEventListener('mousemove', function(event) {
+    mouseX = event.clientX;
 });
 
 const modelLoader = new GLTFLoader();
@@ -266,6 +289,11 @@ modelLoader.load(
 // Animate
 function animate() {
     requestAnimationFrame(animate);
+
+    if(trackingMouse == true) {
+        personModel.rotation.y = THREE.MathUtils.degToRad(mouseX);
+    }
+
     renderer.render(scene, camera);
 }
 animate();

@@ -13,9 +13,8 @@
     </style>
   </head>
   <body>
-    <script type="module" src="/src/main.js"></script>
-    <script type="module" src="/src/uicontrols.js"></script>
     <div id="app-container">
+        <canvas id="renderer-canvas"></canvas>
         <div id="game-controls">
             <div class="tab-container">
                 <div id="body-tab-button" class="tab">
@@ -83,12 +82,12 @@
                 <div class="character-attribute-control-container">
                     <p>NOSE SIZE</p>
                     <input value="0" type="range" id="noseSizeInput" />
-                    <p id="mouth-size-value">0</p>
+                    <p id="nose-size-value">0</p>
                 </div>
                 <div class="character-attribute-control-container">
                     <p>NOSE Y</p>
                     <input value="0" type="range" id="noseYInput" />
-                    <p id="mouth-y-value">0</p>
+                    <p id="nose-y-value">0</p>
                 </div>            </div>
             <div class="tab-content" id="mouth-controls">
                 <div class="character-attribute-control-container">
@@ -113,5 +112,7 @@
             </div>
         </div>
     </div>
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/uicontrols.js"></script>
   </body>
 </html>
