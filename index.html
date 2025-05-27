@@ -14,13 +14,102 @@
   </head>
   <body>
     <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/uicontrols.js"></script>
     <div id="app-container">
         <div id="game-controls">
-            <div id="body-controls">
-                <h3>Body Color</h3>
-                <input type="range" id="bodyColorR" />
-                <input type="range" id="bodyColorG" />
-                <input type="range" id="bodyColorB" />
+            <div class="tab-container">
+                <div id="body-tab-button" class="tab">
+                    <h3>Body</h3>
+                </div>
+                <div id="eyes-tab-button" class="tab">
+                    <h3>Eyes</h3>
+                </div>
+                <div id="nose-tab-button" class="tab">
+                    <h3>Nose</h3>
+                </div>
+                <div id="mouth-tab-button" class="tab">
+                    <h3>Mouth</h3>
+                </div>
+                <div id="clothes-tab-button" class="tab">
+                    <h3>Clothes</h3>
+                </div>
+                <div id="scene-tab-button" class="tab">
+                    <h3>Scene</h3>
+                </div>
+                <div id="save-tab-button" class="tab">
+                    <h3>Save</h3>
+                </div>
+            </div>
+            <div class="tab-content" id="body-controls">
+                <div class="character-attribute-control-container">
+                    <p>BODY COLOR R</p>
+                    <input value="0" type="range" id="bodyColorR" />
+                    <p id="body-color-r-value"></p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>BODY COLOR G</p>
+                    <input value="0" type="range" id="bodyColorG" />
+                    <p id="body-color-g-value"></p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>BODY COLOR B</p>
+                    <input value="0" type="range" id="bodyColorB" />
+                    <p id="body-color-b-value"></p>
+                </div>
+            </div>
+            <div class="tab-content" id="eye-controls">
+                <div class="character-attribute-control-container">
+                    <p>EYE SIZE</p>
+                    <input value="0" type="range" id="eyeSizeInput" />
+                    <p id="eye-size-value">0</p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>EYES Y</p>
+                    <input value="0" type="range" id="eyesYInput" />
+                    <p id="eye-y-value">0</p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>DISTANCE APART</p>
+                    <input value="0" type="range" id="eyeDistApartInput" min="0" max="25" />
+                    <p id="eye-dist-apart-value">0</p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>EYE TILT</p>
+                    <input value="0" type="range" id="eyeTiltInput" />
+                    <p id="eye-tilt-value">0</p>
+                </div>
+            </div>
+            <div class="tab-content" id="nose-controls">
+                <div class="character-attribute-control-container">
+                    <p>NOSE SIZE</p>
+                    <input value="0" type="range" id="noseSizeInput" />
+                    <p id="mouth-size-value">0</p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>NOSE Y</p>
+                    <input value="0" type="range" id="noseYInput" />
+                    <p id="mouth-y-value">0</p>
+                </div>            </div>
+            <div class="tab-content" id="mouth-controls">
+                <div class="character-attribute-control-container">
+                    <p>MOUTH SIZE</p>
+                    <input value="0" type="range" id="mouthSizeInput" />
+                    <p id="mouth-size-value">0</p>
+                </div>
+                <div class="character-attribute-control-container">
+                    <p>MOUTH Y</p>
+                    <input value="0" type="range" id="mouthYInput" />
+                    <p id="mouth-y-value">0</p>
+                </div>
+            </div>
+            <div class="tab-content" id="clothes-controls">
+                <h1>clothes</h1>
+            </div>
+            <div class="tab-content" id="scene-controls">
+                <h1>scene</h1>
+            </div>
+            <div class="tab-content" id="save-controls">
+                <h1>save</h1>
             </div>
         </div>
     </div>

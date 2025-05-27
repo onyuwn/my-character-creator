@@ -1,7 +1,59 @@
+@font-face {
+    font-family: "angelicpeace";
+    src: url("../public/Angelic Peace.ttf");
+}
+
+body {
+    font-size: 32px;
+    font-family: "angelicpeace";
+    background-image: url("../public/kitchenfloor2.png");
+    background-size:cover;
+    color:rgb(0, 0, 0);
+}
+
 #app-container {
     display: flex;
 }
 
 #game-controls {
     flex-grow: 1;
+}
+
+.character-attribute-control-container {
+    display: flex;
+}
+
+.tab-container {
+    display: flex;
+    background-color: rgb(229, 255, 0);
+}
+
+.tab {
+    margin: 2px;
+    padding:1px;
+    padding-left:4px;
+    padding-right:4px;
+    border: dashed 1px red;
+    cursor: pointer;
+    box-shadow: inset -4px -8px 10px rgb(4, 51, 0);
+}
+
+.tab h3 {
+    font-family: "angelicpeace";
+    font-weight: 1 !important;
+    margin: 0 !important;
+}
+
+canvas {
+    border: 1px dashed red;
+}
+
+p {
+    background-color: rgb(229, 255, 0);
+    border-radius: 5px;
+    box-shadow: inset -4px -8px 10px rgb(4, 51, 0);
+}
+
+.tab:hover {
+    border: dashed 3px green;
 }
