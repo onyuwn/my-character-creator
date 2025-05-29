@@ -21,7 +21,7 @@ var saveTabButton = document.getElementById("save-tab-button");
 
 const baseEyeSize = 0.05;
 const baseEyeDistApart = .05;
-const baseEyeYPos = -.1;
+const baseEyeYPos = 0;
 const baseEyeTilt = 0.0;
 const baseNoseYPos = 0.0;
 const baseNoseSize = 0.0;
@@ -148,7 +148,7 @@ bodyColorBSlider.oninput = function() {
 
 eyeSizeSlider.oninput = function() {
     if(eyeLeft && eyeRight) {
-        var newScale = baseEyeSize + (this.value * .005);
+        var newScale = baseEyeSize + (this.value * .01);
         eyeLeft.scale.set(newScale, newScale, newScale);
         eyeRight.scale.set(newScale, newScale, newScale);
         document.getElementById("eye-size-value").innerHTML = newScale;
@@ -157,18 +157,18 @@ eyeSizeSlider.oninput = function() {
 
 eyeDistSlider.oninput = function() {
     if(eyeLeft && eyeRight) {
-        var newDist = baseEyeDistApart + (this.value * .01);
-        eyeLeft.position.x =  personEyesPosition.x - (newDist / 2);
-        eyeRight.position.x = personEyesPosition.x + (newDist / 2);
+        var newDist = baseEyeDistApart + (this.value * .1);
+        eyeLeft.position.z = (newDist / 2);
+        eyeRight.position.z = -(newDist / 2);
         document.getElementById("eye-dist-apart-value").innerHTML = newDist;
     }
 }
 
 eyesYSlider.oninput = function() {
     if(eyeLeft && eyeRight) {
-        var newHeight = baseEyeYPos + (this.value * .01);
-        eyeLeft.position.y = personEyesPosition.y + newHeight;
-        eyeRight.position.y = personEyesPosition.y +  newHeight;
+        var newHeight = (this.value * .05);
+        eyeLeft.position.y = newHeight;
+        eyeRight.position.y = newHeight;
         document.getElementById("eye-y-value").innerHTML = newHeight;
     }
 }
@@ -189,8 +189,8 @@ mouthSizeSlider.addEventListener('input', function() {
 });
 
 mouthYSlider.addEventListener('input', function() {
-    var newHeight = baseMouthYPos + (this.value * .01);
-    mouth.position.y = personMouthPosition.y + newHeight;
+    var newHeight = baseMouthYPos + (this.value * .05);
+    mouth.position.y = newHeight;
     document.getElementById("mouth-y-value").innerHTML = newHeight;
 });
 
@@ -201,8 +201,8 @@ noseSizeSlider.addEventListener('input', function() {
 });
 
 noseYSlider.addEventListener('input', function() {
-    var newHeight = baseNoseYPos + (this.value * .01)
-    nose.position.y = personNosePosition.y + newHeight;
+    var newHeight = baseNoseYPos + (this.value * .05)
+    nose.position.y = newHeight;
     document.getElementById("nose-y-value").innerHTML = newHeight;
 });
 
@@ -253,32 +253,50 @@ modelLoader.load(
 
         light.lookAt(personModel.position);
 
+        var personEyeLPosition = new THREE.Vector3();
+        var personEyeRPosition = new THREE.Vector3();
+
         personModel.traverse((child) => {
             console.warn(child);
             if(child.isMesh) {
                 child.material = personShaderMaterial;
             }
-            if(child.name == 'eyescontainer') {
-                child.getWorldPosition(personEyesPosition);
-                eyeLeft.position.set(personEyesPosition.x - (baseEyeDistApart / 2), personEyesPosition.y - .1, personEyesPosition.z + .1);
-                eyeRight.position.set(personEyesPosition.x + (baseEyeDistApart / 2), personEyesPosition.y - .1, personEyesPosition.z + .1);
+            if(child.name == 'eyerightcontainer') {
+                child.getWorldPosition(personEyeRPosition);
+                child.attach(eyeRight);
+                eyeRight.position.set(0,0,0);
+                // eyeLeft.position.set(personEyesPosition.x - (baseEyeDistApart / 2), personEyesPosition.y - .1, personEyesPosition.z + .1);
+                // eyeRight.position.set(personEyesPosition.x + (baseEyeDistApart / 2), personEyesPosition.y - .1, personEyesPosition.z + .1);
             }
-            if(child.name == 'shirtcontainer') {
+            else if(child.name == 'eyeleftcontainer') {
+                child.getWorldPosition(personEyeLPosition);
+                child.attach(eyeLeft);
+                eyeLeft.position.set(0,0,0);
+            }
+            else if(child.name == 'shirtcontainer') {
                 child.getWorldPosition(personShirtPosition);
             }
-            if(child.name == 'mouthcontainer') {
+            else if(child.name == 'mouthcontainer') {
                 child.getWorldPosition(personMouthPosition);
-                mouth.position.set(personMouthPosition.x, personMouthPosition.y, personMouthPosition.z +.1);
+                //mouth.position.set(personMouthPosition.x, personMouthPosition.y, personMouthPosition.z +.1);
                 mouth.scale.set(.1, .1, .1);
+                child.attach(mouth);
+                mouth.position.set(0,0,0);
             }
-            if(child.name == 'nosecontainer') {
+            else if(child.name == 'nosecontainer') {
                 child.getWorldPosition(personNosePosition);
-                nose.position.set(personNosePosition.x, personNosePosition.y, personNosePosition.z + .1);
+                //nose.position.set(personNosePosition.x, personNosePosition.y, personNosePosition.z + .1);
                 nose.scale.set(.1, .1, .1);
+                child.attach(nose);
+                nose.position.set(0,0,0);
             }
         });
-
+        personEyesPosition = new THREE.Vector3((personEyeLPosition.x + personEyeRPosition.x) / 2, personEyeLPosition.y, (personEyeLPosition.z + personEyeRPosition.z) / 2);
         scene.add(gltf.scene);
+        eyeLeft.material = smileyMat;
+        eyeRight.material = smileyMat;
+        mouth.material = mouthMat;
+        nose.material = noseMat;
     },
     undefined,
     (error) => {
@@ -286,12 +304,26 @@ modelLoader.load(
     }
 )
 
+var cameraMoving = false;
+var t = 0;
+var posFrom = undefined;
+var posTo = undefined;
+
 // Animate
 function animate() {
     requestAnimationFrame(animate);
 
     if(trackingMouse == true) {
         personModel.rotation.y = THREE.MathUtils.degToRad(mouseX);
+    }
+
+    if(cameraMoving == true) {
+        t += 0.01;
+        if (t >= 1) {
+            t = 1;
+            cameraMoving = false;
+        }
+        camera.position.lerpVectors(posFrom, posTo, t);
     }
 
     renderer.render(scene, camera);
@@ -307,33 +339,44 @@ window.addEventListener('resize', () => {
 });
 
 bodyTabButton.addEventListener("click",  function() {
-    camera.position.x = defaultPos.x;
-    camera.position.y = defaultPos.y;
-    camera.position.z = defaultPos.z;
+    // camera.position.x = defaultPos.x;
+    // camera.position.y = defaultPos.y;
+    // camera.position.z = defaultPos.z;
+    t = 0;
+    cameraMoving = true;
+    posFrom = camera.position;
+    posTo = new THREE.Vector3(defaultPos.x, defaultPos.y, defaultPos.z + 1.0);
 });
 
 eyesTabButton.addEventListener("click",  function() {
-    camera.position.x = personEyesPosition.x;
-    camera.position.y = personEyesPosition.y;
-    camera.position.z = personEyesPosition.z + 1;
+    // camera.position.x = personEyesPosition.x;
+    // camera.position.y = personEyesPosition.y;
+    // camera.position.z = personEyesPosition.z + 1;
+    t = 0;
+    cameraMoving = true;
+    posFrom = camera.position;
+    posTo = new THREE.Vector3(personEyesPosition.x, personEyesPosition.y, personEyesPosition.z + 1.0);
 });
 
 mouthTabButton.addEventListener("click",  function() {
-    camera.position.x = personEyesPosition.x;
-    camera.position.y = personEyesPosition.y;
-    camera.position.z = personEyesPosition.z + 1;
+    t = 0;
+    cameraMoving = true;
+    posFrom = camera.position;
+    posTo = new THREE.Vector3(personEyesPosition.x, personEyesPosition.y, personEyesPosition.z + 1.0);
 });
 
 noseTabButton.addEventListener("click",  function() {
-    camera.position.x = personEyesPosition.x;
-    camera.position.y = personEyesPosition.y;
-    camera.position.z = personEyesPosition.z + 1;
+    t = 0;
+    cameraMoving = true;
+    posFrom = camera.position;
+    posTo = new THREE.Vector3(personEyesPosition.x, personEyesPosition.y, personEyesPosition.z + 1.0);
 });
 
 clothesTabButton.addEventListener("click",  function() {
-    camera.position.x = personShirtPosition.x;
-    camera.position.y = personShirtPosition.y;
-    camera.position.z = personShirtPosition.z + 3.5;
+    t = 0;
+    cameraMoving = true;
+    posFrom = camera.position;
+    posTo = new THREE.Vector3(personShirtPosition.x, personShirtPosition.y, personShirtPosition.z + 1.0);
 });
 
 const updateTexture = (bodyPart, txPath) => {

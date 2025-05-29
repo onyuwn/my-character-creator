@@ -96,3 +96,7 @@ p {
     grid-template-rows: repeat(3, auto);
     gap: 1em;
 }
+
+.attValue {
+    max-width: 50px;
+}
