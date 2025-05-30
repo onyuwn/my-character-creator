@@ -319,6 +319,17 @@ rendererCanvas.addEventListener('mouseleave', function() {
 
 var lastMouseX = null;
 var lastMouseY = null;
+var drawing = false;
+
+shirtDesignerRendererCanvas.addEventListener('mousedown', function() {
+    drawing = true;
+    lastMouseX = null;
+    lastMouseY = null;
+});
+
+shirtDesignerRendererCanvas.addEventListener('mouseup', function() {
+    drawing = false;
+});
 
 shirtDesignerRendererCanvas.addEventListener('mouseenter', function() {
     designerTrackingMouse = true;
@@ -334,7 +345,7 @@ document.addEventListener('mousemove', function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
 
-    if(designerTrackingMouse == true) {
+    if(designerTrackingMouse == true && drawing == true) {
         var rect = shirtDesignerRendererCanvas.getBoundingClientRect();
         var x = Math.floor(mouseX - rect.left);
         var y = Math.floor(mouseY - rect.top);
