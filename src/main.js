@@ -21,6 +21,12 @@ var clothesTabButton = document.getElementById("clothes-tab-button");
 var sceneTabButton = document.getElementById("scene-tab-button");
 var saveTabButton = document.getElementById("save-tab-button");
 
+var clothesFrontSideButton = document.getElementById("clothesFrontButton");
+var clothesBackSideButton = document.getElementById("clothesBackButton");
+
+clothesFrontSideButton.style.backgroundColor = "red";
+
+
 const baseEyeSize = 0.05;
 const baseEyeDistApart = .05;
 const baseEyeYPos = 0;
@@ -56,6 +62,7 @@ var appContainer = document.getElementById("app-container");
 
 const geometry = new THREE.PlaneGeometry();
 const shirtDesignerGeometry = new THREE.PlaneGeometry(2,2);
+shirtDesignerGeometry.setAttribute('uv1', geometry.getAttribute('uv').clone());
 const smileyTx = new THREE.TextureLoader().load('planetx1.png');
 const mouthTx = new THREE.TextureLoader().load('mouthtx1.png');
 const noseTx = new THREE.TextureLoader().load('nose1.png');
@@ -138,12 +145,18 @@ var personShaderMaterial = new THREE.ShaderMaterial({
 
 
 var shirtData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
+var shirtBackData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
 
 for(let i = 0; i < shirtDesignerRendererCanvas.clientWidth * shirtDesignerRendererCanvas.clientHeight; i++) {
     shirtData[i * 4 + 0] = 1.0; // R
     shirtData[i * 4 + 1] = 1.0; // G
     shirtData[i * 4 + 2] = 1.0; // B
     shirtData[i * 4 + 3] = 1.0; // A
+
+    shirtBackData[i * 4 + 0] = 1.0; // R
+    shirtBackData[i * 4 + 1] = 1.0; // G
+    shirtBackData[i * 4 + 2] = 1.0; // B
+    shirtBackData[i * 4 + 3] = 1.0; // A
 }
 
 const shirtTexture = new THREE.DataTexture(
@@ -153,6 +166,15 @@ const shirtTexture = new THREE.DataTexture(
     THREE.RGBAFormat,
     THREE.FloatType
 );
+
+const shirtBackTexture = new THREE.DataTexture(
+    shirtBackData,
+    shirtDesignerRendererCanvas.clientWidth,
+    shirtDesignerRendererCanvas.clientHeight,
+    THREE.RGBAFormat,
+    THREE.FloatType
+);
+
 shirtTexture.needsUpdate = true;
 shirtTexture.minFilter = THREE.NearestFilter;
 shirtTexture.magFilter = THREE.NearestFilter;
@@ -160,18 +182,33 @@ shirtTexture.generateMipmaps = false;
 shirtTexture.wrapS = THREE.ClampToEdgeWrapping;
 shirtTexture.wrapT = THREE.ClampToEdgeWrapping;
 
+shirtBackTexture.needsUpdate = true;
+shirtBackTexture.minFilter = THREE.NearestFilter;
+shirtBackTexture.magFilter = THREE.NearestFilter;
+shirtBackTexture.generateMipmaps = false;
+shirtBackTexture.wrapS = THREE.ClampToEdgeWrapping;
+shirtBackTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+var activeShirtSide = "FRONT";
+
 var shirtUniforms = { 
     shirtTx: { value: shirtTexture },
+    shirtBackTx: { value: shirtBackTexture },
     canvasW: { value: shirtDesignerRendererCanvas.clientWidth },
-    canvasH: { value: shirtDesignerRendererCanvas.clientHeight }
+    canvasH: { value: shirtDesignerRendererCanvas.clientHeight },
+    activeSide: { value: 0 }
 };
 
 const shirtMat = new THREE.ShaderMaterial({
     uniforms:shirtUniforms,
     vertexShader: `
         varying vec2 vUv;
+        attribute vec2 uv1;
+        varying vec2 vUv2;
+
         void main() {
             vUv = uv;
+            vUv2 = uv1;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `,
@@ -179,18 +216,73 @@ const shirtMat = new THREE.ShaderMaterial({
         precision highp float;
 
         uniform sampler2D shirtTx;
+        uniform sampler2D shirtBackTx;
         varying vec2 vUv;
+        varying vec2 vUv2;
 
         void main() {
-            vec3 color = texture2D(shirtTx, vUv).rgb;
-            gl_FragColor = vec4(color, 1.0);
+            if(vUv.x <= 0.0 && vUv.y <= 0.0) {
+                vec3 color = texture2D(shirtBackTx, vUv2).rgb;
+                gl_FragColor = vec4(color, 1.0);
+            } else {
+                vec3 color = texture2D(shirtTx, vUv).rgb;
+                gl_FragColor = vec4(color, 1.0);
+            }
         }
     `,
 });
 
-var shirtDesignMesh = new THREE.Mesh(shirtDesignerGeometry, shirtMat);
+const shirtDesignerMat = new THREE.ShaderMaterial({
+    uniforms:shirtUniforms,
+    vertexShader: `
+        varying vec2 vUv;
+        attribute vec2 uv1;
+        varying vec2 vUv2;
+
+        void main() {
+            vUv = uv;
+            vUv2 = uv1;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        precision highp float;
+
+        uniform sampler2D shirtTx;
+        uniform sampler2D shirtBackTx;
+        varying vec2 vUv;
+        varying vec2 vUv2;
+        uniform int activeSide;
+
+        void main() {
+            if(activeSide == 1) {
+                vec3 color = texture2D(shirtBackTx, vUv2).rgb;
+                gl_FragColor = vec4(color, 1.0);
+            } else {
+                vec3 color = texture2D(shirtTx, vUv).rgb;
+                gl_FragColor = vec4(color, 1.0);
+            }
+        }
+    `,
+});
+
+var shirtDesignMesh = new THREE.Mesh(shirtDesignerGeometry, shirtDesignerMat);
 shirtDesignerScene.add(shirtDesignMesh);
 shirtDesignMesh.rotation.y = THREE.MathUtils.degToRad(0);
+
+clothesBackSideButton.addEventListener("click", function() {
+    activeShirtSide = "BACK";
+    clothesBackSideButton.style.backgroundColor = "red";
+    clothesFrontSideButton.style.background = "none";
+    shirtDesignerMat.uniforms.activeSide.value = 1;
+});
+
+clothesFrontSideButton.addEventListener("click", function() {
+    activeShirtSide = "FRONT";
+    clothesFrontSideButton.style.backgroundColor = "red";
+    clothesBackSideButton.style.background = "none";
+    shirtDesignerMat.uniforms.activeSide.value = 0;
+});
 
 function updateShirtTx(x, y, color, radius) {
     console.warn(`updating shirt @ ${x}, ${y} (${color.x}, ${color.y}, ${color.z})`);
@@ -212,15 +304,23 @@ function updateShirtTx(x, y, color, radius) {
 
             if (dx * dx + dy * dy <= rSquared) {
                 const index = (py * width + px) * 4;
-                shirtData[index + 0] = color.x;
-                shirtData[index + 1] = color.y;
-                shirtData[index + 2] = color.z;
-                shirtData[index + 3] = 1.0;
+                if(activeShirtSide == "FRONT") {
+                    shirtData[index + 0] = color.x;
+                    shirtData[index + 1] = color.y;
+                    shirtData[index + 2] = color.z;
+                    shirtData[index + 3] = 1.0;
+                    shirtTexture.needsUpdate = true;
+                } else {
+                    shirtBackData[index + 0] = color.x;
+                    shirtBackData[index + 1] = color.y;
+                    shirtBackData[index + 2] = color.z;
+                    shirtBackData[index + 3] = 1.0;
+                    shirtBackTexture.needsUpdate = true;
+                }
             }
         }
     }
 
-    shirtTexture.needsUpdate = true;
 }
 
 bodyColorRSlider.oninput = function() {
@@ -434,6 +534,7 @@ modelLoader.load(
                         //child.attach(shirtModel);
                         //shirtModel.position.set(0,0,0);
                         shirtGltf.scene.traverse((shirtChild) => {
+                            console.warn(shirtGltf)
                             if(shirtChild.isMesh == true) {
                                 shirtModel = shirtChild;
                                 scene.add(shirtModel);
@@ -446,6 +547,9 @@ modelLoader.load(
                                 shirtModel.position.z-= .075;
                                 shirtModel.rotation.y = THREE.MathUtils.degToRad(0);
                                 shirtModel.material = shirtMat;
+                                console.warn(shirtModel);
+                                console.log(shirtModel.geometry.attributes.uv);  // default UVs (uv)
+                                console.log(shirtModel.geometry.attributes.uv1);
                             }
                         })
                     }
