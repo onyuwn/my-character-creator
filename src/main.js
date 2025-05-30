@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 const scene = new THREE.Scene();
+const shirtDesignerScene = new THREE.Scene();
 const clock = new THREE.Clock();
 
 var rendererWScale = 3;
@@ -10,6 +11,7 @@ var rendererHScale = 1;
 var rendererWidth = window.innerWidth / rendererWScale;
 var rendererHeight = window.innerHeight / rendererHScale;
 var mouseX = 0;
+var mouseY = 0;
 
 var bodyTabButton = document.getElementById("body-tab-button");
 var eyesTabButton = document.getElementById("eyes-tab-button");
@@ -30,14 +32,20 @@ const baseMouthSize = 0.0;
 
 const camera = new THREE.PerspectiveCamera(
     75, rendererWidth / rendererHeight, 0.1, 1000
-  );
+);
 camera.position.z = 5;
 const defaultPos = new THREE.Vector3(0.0, 0.0, 5.0);
 const mouthPos = new THREE.Vector3(0.0, 0.0, 0.0);
 
 var rendererCanvas = document.getElementById("renderer-canvas");
-const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: rendererCanvas });
+var shirtDesignerRendererCanvas = document.getElementById("shirtDesigner");
+const renderer = new THREE.WebGLRenderer({ antialias: false, canvas: rendererCanvas });
+const designerRenderer = new THREE.WebGLRenderer({antialias: false, canvas: shirtDesignerRendererCanvas})
 renderer.setSize(rendererWidth, rendererHeight);
+
+designerRenderer.setSize(shirtDesignerRendererCanvas.clientWidth, shirtDesignerRendererCanvas.clientHeight);
+
+const shirtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 var appContainer = document.getElementById("app-container");
 //appContainer.insertBefore(renderer.domElement, appContainer.firstChild);
 
@@ -47,17 +55,19 @@ var appContainer = document.getElementById("app-container");
 // scene.add(cube);
 
 const geometry = new THREE.PlaneGeometry();
+const shirtDesignerGeometry = new THREE.PlaneGeometry(2,2);
 const smileyTx = new THREE.TextureLoader().load('planetx1.png');
 const mouthTx = new THREE.TextureLoader().load('mouthtx1.png');
 const noseTx = new THREE.TextureLoader().load('nose1.png');
 const smileyMat = new THREE.MeshStandardMaterial({ map: smileyTx, transparent: true, side: THREE.DoubleSide });
-const mouthMat = new THREE.MeshStandardMaterial({ map: mouthTx, transparent: true, size: THREE.DoubleSide });
-const noseMat = new THREE.MeshStandardMaterial({ map: noseTx, transparent: true, size: THREE.DoubleSide });
+const mouthMat = new THREE.MeshStandardMaterial({ map: mouthTx, transparent: true, side: THREE.DoubleSide });
+const noseMat = new THREE.MeshStandardMaterial({ map: noseTx, transparent: true, side: THREE.DoubleSide });
 const eyeLeft = new THREE.Mesh(geometry, smileyMat);
 const eyeRight = new THREE.Mesh(geometry, smileyMat);
 const mouth = new THREE.Mesh(geometry, mouthMat);
 const nose = new THREE.Mesh(geometry, noseMat);
 var trackingMouse = false;
+var designerTrackingMouse = false;
 eyeLeft.rotation.y = THREE.MathUtils.degToRad(180)
 scene.add(eyeLeft);
 scene.add(eyeRight);
@@ -77,6 +87,7 @@ scene.add(light);
 
 var bgSceneModel = undefined;
 var personModel = undefined;
+var shirtModel = undefined;
 var personEyesPosition = new THREE.Vector3();
 var personShirtPosition = new THREE.Vector3();
 var personMouthPosition = new THREE.Vector3();
@@ -124,6 +135,93 @@ var personShaderMaterial = new THREE.ShaderMaterial({
         }
     `,
 });
+
+
+var shirtData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
+
+for(let i = 0; i < shirtDesignerRendererCanvas.clientWidth * shirtDesignerRendererCanvas.clientHeight; i++) {
+    shirtData[i * 4 + 0] = 1.0; // R
+    shirtData[i * 4 + 1] = 1.0; // G
+    shirtData[i * 4 + 2] = 1.0; // B
+    shirtData[i * 4 + 3] = 1.0; // A
+}
+
+const shirtTexture = new THREE.DataTexture(
+    shirtData,
+    shirtDesignerRendererCanvas.clientWidth,
+    shirtDesignerRendererCanvas.clientHeight,
+    THREE.RGBAFormat,
+    THREE.FloatType
+);
+shirtTexture.needsUpdate = true;
+shirtTexture.minFilter = THREE.NearestFilter;
+shirtTexture.magFilter = THREE.NearestFilter;
+shirtTexture.generateMipmaps = false;
+shirtTexture.wrapS = THREE.ClampToEdgeWrapping;
+shirtTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+var shirtUniforms = { 
+    shirtTx: { value: shirtTexture },
+    canvasW: { value: shirtDesignerRendererCanvas.clientWidth },
+    canvasH: { value: shirtDesignerRendererCanvas.clientHeight }
+};
+
+const shirtMat = new THREE.ShaderMaterial({
+    uniforms:shirtUniforms,
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        precision highp float;
+
+        uniform sampler2D shirtTx;
+        varying vec2 vUv;
+
+        void main() {
+            vec3 color = texture2D(shirtTx, vUv).rgb;
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `,
+});
+
+var shirtDesignMesh = new THREE.Mesh(shirtDesignerGeometry, shirtMat);
+shirtDesignerScene.add(shirtDesignMesh);
+shirtDesignMesh.rotation.y = THREE.MathUtils.degToRad(0);
+
+function updateShirtTx(x, y, color, radius) {
+    console.warn(`updating shirt @ ${x}, ${y} (${color.x}, ${color.y}, ${color.z})`);
+    var width = shirtDesignerRendererCanvas.clientWidth;
+    var height = shirtDesignerRendererCanvas.clientHeight;
+    var flippedY = shirtDesignerRendererCanvas.clientHeight - y - 1;
+
+    const startX = Math.max(0, x - radius);
+    const endX = Math.min(width - 1, x + radius);
+    const startY = Math.max(0, flippedY - radius);
+    const endY = Math.min(height - 1, flippedY + radius);
+    
+    const rSquared = radius * radius;
+
+    for (let py = startY; py <= endY; py++) {
+        for (let px = startX; px <= endX; px++) {
+            const dx = px - x;
+            const dy = py - flippedY;
+
+            if (dx * dx + dy * dy <= rSquared) {
+                const index = (py * width + px) * 4;
+                shirtData[index + 0] = color.x;
+                shirtData[index + 1] = color.y;
+                shirtData[index + 2] = color.z;
+                shirtData[index + 3] = 1.0;
+            }
+        }
+    }
+
+    shirtTexture.needsUpdate = true;
+}
 
 bodyColorRSlider.oninput = function() {
     if(personModel) {
@@ -219,8 +317,53 @@ rendererCanvas.addEventListener('mouseleave', function() {
     personModel.rotation.y = THREE.MathUtils.degToRad(-90);
 });
 
+var lastMouseX = null;
+var lastMouseY = null;
+
+shirtDesignerRendererCanvas.addEventListener('mouseenter', function() {
+    designerTrackingMouse = true;
+});
+
+shirtDesignerRendererCanvas.addEventListener('mouseleave', function() {
+    designerTrackingMouse = false;
+    lastMouseX = null;
+    lastMouseY = null;
+});
+
 document.addEventListener('mousemove', function(event) {
     mouseX = event.clientX;
+    mouseY = event.clientY;
+
+    if(designerTrackingMouse == true) {
+        var rect = shirtDesignerRendererCanvas.getBoundingClientRect();
+        var x = Math.floor(mouseX - rect.left);
+        var y = Math.floor(mouseY - rect.top);
+
+        const brushColor = new THREE.Vector3(1.0, 0.0, 0.0);
+        const brushRadius = 6;
+
+        if(lastMouseX !== null && lastMouseY !== null) {
+            var dx = x - lastMouseX;
+            var dy = y - lastMouseY;
+            var dist = Math.sqrt(dx * dx, dy * dy);
+            var steps = Math.ceil(dist);
+
+            for(let i = 0; i <= steps; i++) {
+                var t = i / steps;
+                var interpX = Math.round(lastMouseX + t * dx);
+                var interpY = Math.round(lastMouseY + t * dy);
+
+                updateShirtTx(interpX, interpY, brushColor, brushRadius);
+            }
+        }
+        else
+        {
+            updateShirtTx(x, y, brushColor, brushRadius);
+        }
+
+        lastMouseX = x;
+        lastMouseY = y;
+    }
 });
 
 const modelLoader = new GLTFLoader();
@@ -257,7 +400,6 @@ modelLoader.load(
         var personEyeRPosition = new THREE.Vector3();
 
         personModel.traverse((child) => {
-            console.warn(child);
             if(child.isMesh) {
                 child.material = personShaderMaterial;
             }
@@ -275,6 +417,28 @@ modelLoader.load(
             }
             else if(child.name == 'shirtcontainer') {
                 child.getWorldPosition(personShirtPosition);
+                modelLoader.load(
+                    'shirt2.glb',
+                    (shirtGltf)=>  {
+                        //child.attach(shirtModel);
+                        //shirtModel.position.set(0,0,0);
+                        shirtGltf.scene.traverse((shirtChild) => {
+                            if(shirtChild.isMesh == true) {
+                                shirtModel = shirtChild;
+                                scene.add(shirtModel);
+                                child.attach(shirtModel);
+                                shirtModel.position.set(0,0,0);
+                                shirtModel.scale.x *=.3;
+                                shirtModel.scale.y *=.25;
+                                shirtModel.scale.z *=.25;
+                                // shirtModel.position.y = -1;
+                                shirtModel.position.z-= .075;
+                                shirtModel.rotation.y = THREE.MathUtils.degToRad(0);
+                                shirtModel.material = shirtMat;
+                            }
+                        })
+                    }
+                )     
             }
             else if(child.name == 'mouthcontainer') {
                 child.getWorldPosition(personMouthPosition);
@@ -303,7 +467,6 @@ modelLoader.load(
         console.error(error);
     }
 )
-
 var cameraMoving = false;
 var t = 0;
 var posFrom = undefined;
@@ -326,7 +489,12 @@ function animate() {
         camera.position.lerpVectors(posFrom, posTo, t);
     }
 
+    if(designerTrackingMouse == true) {
+        //pixels.[mouseX.floor * M](new THREE.Vector3(mouseX, mouseY, 0));
+    }
+
     renderer.render(scene, camera);
+    designerRenderer.render(shirtDesignerScene, shirtCamera);
 }
 animate();
 
@@ -336,6 +504,10 @@ window.addEventListener('resize', () => {
     camera.aspect = rendererWidth / rendererHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(rendererWidth, rendererHeight);
+
+    shirtCamera.aspect = shirtDesignerRendererCanvas.clientWidth / shirtDesignerRendererCanvas.clientHeight;
+    shirtCamera.updateProjectionMatrix();
+    designerRenderer.setSize(shirtDesignerRendererCanvas.clientWidth, shirtDesignerRendererCanvas.clientHeight)
 });
 
 bodyTabButton.addEventListener("click",  function() {

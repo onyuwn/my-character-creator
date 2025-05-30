@@ -146,8 +146,24 @@
                 </div>
             </div>
             <div class="tab-content" id="clothes-controls">
-                <h1>clothes</h1>
-            </div>
+                <div class="col">
+                    <div class="character-attribute-control-container">
+                        <p>SHIRT SIZE</p>
+                        <input value="0" type="range" id="shirtSizeInput" />
+                        <p id="shirt-size-value" class="attValue">0</p>
+                    </div>
+                </div>
+                <div id="nose-selection-container" class="col">
+                    <div class="topStyleOption textureOption">
+                        <img src="/shirt.png" />
+                    </div>
+                    <div class="topStyleOption textureOption">
+                        <img src="/noneOption.png" />
+                    </div>
+                    <div id="shirtDesignerContainer">
+                        <canvas id="shirtDesigner"></canvas>
+                    </div>
+                </div>            </div>
             <div class="tab-content" id="scene-controls">
                 <h1>scene</h1>
             </div>

@@ -100,3 +100,15 @@ p {
 .attValue {
     max-width: 50px;
 }
+
+#shirtDesignerContainer {
+    outline: 1px dashed red;
+    grid-row: 2 / 4;
+    grid-column: 1 / 4;
+    height: 500px;
+}
+
+#shirtDesigner {
+    height: 100%;
+    width:100%;
+}
