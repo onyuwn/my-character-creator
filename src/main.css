@@ -112,3 +112,18 @@ p {
     height: 100%;
     width:100%;
 }
+
+#clothesSideToggle {
+    display: flex;
+}
+
+#designerControls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    grid-column: 1 / 4;
+}
+
+#designerControls p {
+    cursor: pointer;
+}

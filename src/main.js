@@ -24,7 +24,7 @@ var saveTabButton = document.getElementById("save-tab-button");
 var clothesFrontSideButton = document.getElementById("clothesFrontButton");
 var clothesBackSideButton = document.getElementById("clothesBackButton");
 
-clothesFrontSideButton.style.backgroundColor = "red";
+clothesFrontSideButton.children[0].style.backgroundColor = "red";
 
 
 const baseEyeSize = 0.05;
@@ -51,7 +51,7 @@ renderer.setSize(rendererWidth, rendererHeight);
 
 designerRenderer.setSize(shirtDesignerRendererCanvas.clientWidth, shirtDesignerRendererCanvas.clientHeight);
 
-const shirtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const shirtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -.2, 10);
 var appContainer = document.getElementById("app-container");
 //appContainer.insertBefore(renderer.domElement, appContainer.firstChild);
 
@@ -95,6 +95,7 @@ scene.add(light);
 var bgSceneModel = undefined;
 var personModel = undefined;
 var shirtModel = undefined;
+var designerShirtModel = undefined;
 var personEyesPosition = new THREE.Vector3();
 var personShirtPosition = new THREE.Vector3();
 var personMouthPosition = new THREE.Vector3();
@@ -143,51 +144,58 @@ var personShaderMaterial = new THREE.ShaderMaterial({
     `,
 });
 
+var shirtTexture = undefined;
+var shirtBackTexture = undefined;
+var shirtBackData = undefined;
+var shirtData = undefined;
 
-var shirtData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
-var shirtBackData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
-
-for(let i = 0; i < shirtDesignerRendererCanvas.clientWidth * shirtDesignerRendererCanvas.clientHeight; i++) {
-    shirtData[i * 4 + 0] = 1.0; // R
-    shirtData[i * 4 + 1] = 1.0; // G
-    shirtData[i * 4 + 2] = 1.0; // B
-    shirtData[i * 4 + 3] = 1.0; // A
-
-    shirtBackData[i * 4 + 0] = 1.0; // R
-    shirtBackData[i * 4 + 1] = 1.0; // G
-    shirtBackData[i * 4 + 2] = 1.0; // B
-    shirtBackData[i * 4 + 3] = 1.0; // A
+function initShirt() {
+    shirtData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
+    shirtBackData = new Float32Array(4 * shirtDesignerRendererCanvas.clientHeight * shirtDesignerRendererCanvas.clientWidth);
+    
+    for(let i = 0; i < shirtDesignerRendererCanvas.clientWidth * shirtDesignerRendererCanvas.clientHeight; i++) {
+        shirtData[i * 4 + 0] = 1.0; // R
+        shirtData[i * 4 + 1] = 1.0; // G
+        shirtData[i * 4 + 2] = 1.0; // B
+        shirtData[i * 4 + 3] = 1.0; // A
+    
+        shirtBackData[i * 4 + 0] = 1.0; // R
+        shirtBackData[i * 4 + 1] = 1.0; // G
+        shirtBackData[i * 4 + 2] = 1.0; // B
+        shirtBackData[i * 4 + 3] = 1.0; // A
+    }
+    
+    shirtTexture = new THREE.DataTexture(
+        shirtData,
+        shirtDesignerRendererCanvas.clientWidth,
+        shirtDesignerRendererCanvas.clientHeight,
+        THREE.RGBAFormat,
+        THREE.FloatType
+    );
+    
+    shirtBackTexture = new THREE.DataTexture(
+        shirtBackData,
+        shirtDesignerRendererCanvas.clientWidth,
+        shirtDesignerRendererCanvas.clientHeight,
+        THREE.RGBAFormat,
+        THREE.FloatType
+    );
+    
+    shirtTexture.minFilter = THREE.NearestFilter;
+    shirtTexture.magFilter = THREE.NearestFilter;
+    shirtTexture.generateMipmaps = false;
+    shirtTexture.wrapS = THREE.ClampToEdgeWrapping;
+    shirtTexture.wrapT = THREE.ClampToEdgeWrapping;
+    shirtTexture.needsUpdate = true;
+    
+    shirtBackTexture.minFilter = THREE.NearestFilter;
+    shirtBackTexture.magFilter = THREE.NearestFilter;
+    shirtBackTexture.generateMipmaps = false;
+    shirtBackTexture.wrapS = THREE.ClampToEdgeWrapping;
+    shirtBackTexture.wrapT = THREE.ClampToEdgeWrapping;
+    shirtBackTexture.needsUpdate = true;
 }
-
-const shirtTexture = new THREE.DataTexture(
-    shirtData,
-    shirtDesignerRendererCanvas.clientWidth,
-    shirtDesignerRendererCanvas.clientHeight,
-    THREE.RGBAFormat,
-    THREE.FloatType
-);
-
-const shirtBackTexture = new THREE.DataTexture(
-    shirtBackData,
-    shirtDesignerRendererCanvas.clientWidth,
-    shirtDesignerRendererCanvas.clientHeight,
-    THREE.RGBAFormat,
-    THREE.FloatType
-);
-
-shirtTexture.needsUpdate = true;
-shirtTexture.minFilter = THREE.NearestFilter;
-shirtTexture.magFilter = THREE.NearestFilter;
-shirtTexture.generateMipmaps = false;
-shirtTexture.wrapS = THREE.ClampToEdgeWrapping;
-shirtTexture.wrapT = THREE.ClampToEdgeWrapping;
-
-shirtBackTexture.needsUpdate = true;
-shirtBackTexture.minFilter = THREE.NearestFilter;
-shirtBackTexture.magFilter = THREE.NearestFilter;
-shirtBackTexture.generateMipmaps = false;
-shirtBackTexture.wrapS = THREE.ClampToEdgeWrapping;
-shirtBackTexture.wrapT = THREE.ClampToEdgeWrapping;
+initShirt();
 
 var activeShirtSide = "FRONT";
 
@@ -196,7 +204,11 @@ var shirtUniforms = {
     shirtBackTx: { value: shirtBackTexture },
     canvasW: { value: shirtDesignerRendererCanvas.clientWidth },
     canvasH: { value: shirtDesignerRendererCanvas.clientHeight },
-    activeSide: { value: 0 }
+    activeSide: { value: 0 },
+    mouseX: { value: 0 },
+    mouseY: { value: 0 },
+    brushSize: { value: 0 },
+    brushColor: { value: 0 }
 };
 
 const shirtMat = new THREE.ShaderMaterial({
@@ -252,15 +264,29 @@ const shirtDesignerMat = new THREE.ShaderMaterial({
         uniform sampler2D shirtBackTx;
         varying vec2 vUv;
         varying vec2 vUv2;
+        uniform vec3 brushColor;
         uniform int activeSide;
+        uniform float mouseX;
+        uniform float mouseY;
+        uniform float brushSize;
+        uniform int canvasW;
+        uniform int canvasH;
 
         void main() {
+            vec3 color = vec3(0.0);
             if(activeSide == 1) {
-                vec3 color = texture2D(shirtBackTx, vUv2).rgb;
+                color = texture2D(shirtBackTx, vUv2).rgb;
                 gl_FragColor = vec4(color, 1.0);
             } else {
-                vec3 color = texture2D(shirtTx, vUv).rgb;
+                color = texture2D(shirtTx, vUv).rgb;
                 gl_FragColor = vec4(color, 1.0);
+            }
+
+            float dMouse = abs(distance(gl_FragCoord.xy, vec2(mouseX, mouseY)));
+
+            if(dMouse < brushSize && dMouse > brushSize - 2.0)
+            {
+                gl_FragColor = vec4(brushColor, 1.0);
             }
         }
     `,
@@ -272,20 +298,20 @@ shirtDesignMesh.rotation.y = THREE.MathUtils.degToRad(0);
 
 clothesBackSideButton.addEventListener("click", function() {
     activeShirtSide = "BACK";
-    clothesBackSideButton.style.backgroundColor = "red";
-    clothesFrontSideButton.style.background = "none";
+    clothesBackSideButton.children[0].style.backgroundColor = "red";
+    clothesFrontSideButton.children[0].style.background = "rgb(229, 255, 0)";
     shirtDesignerMat.uniforms.activeSide.value = 1;
 });
 
 clothesFrontSideButton.addEventListener("click", function() {
     activeShirtSide = "FRONT";
-    clothesFrontSideButton.style.backgroundColor = "red";
-    clothesBackSideButton.style.background = "none";
+    clothesFrontSideButton.children[0].style.backgroundColor = "red";
+    clothesBackSideButton.children[0].style.background = "rgb(229, 255, 0)";
     shirtDesignerMat.uniforms.activeSide.value = 0;
 });
 
 function updateShirtTx(x, y, color, radius) {
-    console.warn(`updating shirt @ ${x}, ${y} (${color.x}, ${color.y}, ${color.z})`);
+    //console.warn(`updating shirt @ ${x}, ${y} (${color.x}, ${color.y}, ${color.z})`);
     var width = shirtDesignerRendererCanvas.clientWidth;
     var height = shirtDesignerRendererCanvas.clientHeight;
     var flippedY = shirtDesignerRendererCanvas.clientHeight - y - 1;
@@ -441,17 +467,58 @@ shirtDesignerRendererCanvas.addEventListener('mouseleave', function() {
     lastMouseY = null;
 });
 
+var brushRadius = 6;
+var brushSizeInput = document.getElementById("brushSizeInput");
+var brushColorRInput = document.getElementById("brushColorRValueInput");
+var brushColorGInput = document.getElementById("brushColorGValueInput");
+var brushColorBInput = document.getElementById("brushColorBValueInput");
+var designerClearButton = document.getElementById("designerClearButton");
+
+designerClearButton.addEventListener("click", function() {
+    var curActiveSide = shirtDesignerMat.uniforms.activeSide.value;
+    shirtDesignerMat.uniforms.activeSide.value = 0;
+    updateShirtTx(0, 0, new THREE.Vector3(1.0, 1.0, 1.0), 1000);
+    shirtDesignerMat.uniforms.activeSide.value = 1;
+    updateShirtTx(0, 0, new THREE.Vector3(1.0, 1.0, 1.0), 1000);
+    shirtDesignerMat.uniforms.activeSide.value = curActiveSide;
+
+    //initShirt();
+});
+
+brushSizeInput.oninput = function() {
+    brushRadius = this.value;
+}
+
+var brushColorR = 0; // brushColorRValueInput
+var brushColorG = 0;
+var brushColorB = 0;
+brushColorRInput.oninput = function() {
+    brushColorR = this.value / 255;
+}
+
+brushColorGInput.oninput = function() {
+    brushColorG = this.value / 255;
+}
+
+brushColorBInput.oninput = function() {
+    brushColorB = this.value / 255;
+}
+
 document.addEventListener('mousemove', function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
 
-    if(designerTrackingMouse == true && drawing == true) {
-        var rect = shirtDesignerRendererCanvas.getBoundingClientRect();
-        var x = Math.floor(mouseX - rect.left);
-        var y = Math.floor(mouseY - rect.top);
+    var rect = shirtDesignerRendererCanvas.getBoundingClientRect();
+    var x = Math.floor(mouseX - rect.left);
+    var y = Math.floor(mouseY - rect.top);
 
-        const brushColor = new THREE.Vector3(1.0, 0.0, 0.0);
-        const brushRadius = 6;
+    shirtDesignerMat.uniforms.mouseX.value = x;
+    shirtDesignerMat.uniforms.mouseY.value = rect.height - y;
+    shirtDesignerMat.uniforms.brushSize.value = brushRadius;
+    const brushColor = new THREE.Vector3(brushColorR, brushColorG, brushColorB);
+    shirtDesignerMat.uniforms.brushColor.value = brushColor;
+
+    if(designerTrackingMouse == true && drawing == true) {
 
         if(lastMouseX !== null && lastMouseY !== null) {
             var dx = x - lastMouseX;
@@ -531,8 +598,6 @@ modelLoader.load(
                 modelLoader.load(
                     'shirt2.glb',
                     (shirtGltf)=>  {
-                        //child.attach(shirtModel);
-                        //shirtModel.position.set(0,0,0);
                         shirtGltf.scene.traverse((shirtChild) => {
                             console.warn(shirtGltf)
                             if(shirtChild.isMesh == true) {
@@ -543,13 +608,17 @@ modelLoader.load(
                                 shirtModel.scale.x *=.3;
                                 shirtModel.scale.y *=.25;
                                 shirtModel.scale.z *=.25;
-                                // shirtModel.position.y = -1;
                                 shirtModel.position.z-= .075;
                                 shirtModel.rotation.y = THREE.MathUtils.degToRad(0);
                                 shirtModel.material = shirtMat;
-                                console.warn(shirtModel);
-                                console.log(shirtModel.geometry.attributes.uv);  // default UVs (uv)
-                                console.log(shirtModel.geometry.attributes.uv1);
+
+                                designerShirtModel = shirtModel.clone();
+                                shirtDesignerScene.add(designerShirtModel);
+                                designerShirtModel.position.set(0,0,0);
+                                designerShirtModel.rotation.y = THREE.MathUtils.degToRad(-90);
+                                designerShirtModel.material = new THREE.MeshStandardMaterial({color:new THREE.Color().setRGB(1.0,0,0)});
+                                designerShirtModel.scale.set(.75,.75,1);
+                                designerShirtModel.position.y -= .25;
                             }
                         })
                     }
