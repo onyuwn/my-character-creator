@@ -1,6 +1,7 @@
 // src/main.js
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { vertexColor } from 'three/tsl';
 
 const scene = new THREE.Scene();
 const shirtDesignerScene = new THREE.Scene();
@@ -46,7 +47,8 @@ const mouthPos = new THREE.Vector3(0.0, 0.0, 0.0);
 var rendererCanvas = document.getElementById("renderer-canvas");
 var shirtDesignerRendererCanvas = document.getElementById("shirtDesigner");
 const renderer = new THREE.WebGLRenderer({ antialias: false, canvas: rendererCanvas });
-const designerRenderer = new THREE.WebGLRenderer({antialias: false, canvas: shirtDesignerRendererCanvas})
+const designerRenderer = new THREE.WebGLRenderer({antialias: false, canvas: shirtDesignerRendererCanvas});
+//designerRenderer.alpha
 renderer.setSize(rendererWidth, rendererHeight);
 
 designerRenderer.setSize(shirtDesignerRendererCanvas.clientWidth, shirtDesignerRendererCanvas.clientHeight);
@@ -66,6 +68,7 @@ shirtDesignerGeometry.setAttribute('uv1', geometry.getAttribute('uv').clone());
 const smileyTx = new THREE.TextureLoader().load('planetx1.png');
 const mouthTx = new THREE.TextureLoader().load('mouthtx1.png');
 const noseTx = new THREE.TextureLoader().load('nose1.png');
+const paintBucketTx = new THREE.TextureLoader().load('paintbucket.png');
 const smileyMat = new THREE.MeshStandardMaterial({ map: smileyTx, transparent: true, side: THREE.DoubleSide });
 const mouthMat = new THREE.MeshStandardMaterial({ map: mouthTx, transparent: true, side: THREE.DoubleSide });
 const noseMat = new THREE.MeshStandardMaterial({ map: noseTx, transparent: true, side: THREE.DoubleSide });
@@ -208,7 +211,7 @@ var shirtUniforms = {
     mouseX: { value: 0 },
     mouseY: { value: 0 },
     brushSize: { value: 0 },
-    brushColor: { value: 0 }
+    brushColor: { value: new THREE.Vector3() }
 };
 
 const shirtMat = new THREE.ShaderMaterial({
@@ -292,6 +295,54 @@ const shirtDesignerMat = new THREE.ShaderMaterial({
     `,
 });
 
+const paintBucketUniforms = {
+    paintBucketTx: { value: paintBucketTx },
+    brushColor: { value: new THREE.Vector3() }
+}
+
+console.warn(paintBucketTx);
+
+const paintBucketMat = new THREE.ShaderMaterial({
+    transparent:true,
+    uniforms: paintBucketUniforms,
+    vertexShader: `
+        varying vec2 vUv;
+
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        varying vec2 vUv;
+        uniform sampler2D paintBucketTx;
+        uniform vec3 brushColor;
+
+        void main() {
+            vec3 color = texture2D(paintBucketTx, vUv).rgb;
+            if(color.r > 100.0 / 255.0 && color.g < .5 && color.b < .5)
+            {
+                gl_FragColor = vec4(brushColor, 1.0);
+            }
+            else if(color.r > .8 && color.g > .8 && color.b > .8) {
+                gl_FragColor = vec4(0.0);
+            }
+            else
+            {
+                gl_FragColor = vec4(color, 1.0);
+            }
+        }
+    `,
+});
+
+
+const paintBucket = new THREE.Mesh(geometry, paintBucketMat);
+shirtDesignerScene.add(paintBucket);
+paintBucket.position.x = -.75;
+paintBucket.position.y = -.75;
+paintBucket.position.z = .2;
+paintBucket.scale.set(.5,.5,.5)
+
 var shirtDesignMesh = new THREE.Mesh(shirtDesignerGeometry, shirtDesignerMat);
 shirtDesignerScene.add(shirtDesignMesh);
 shirtDesignMesh.rotation.y = THREE.MathUtils.degToRad(0);
@@ -330,6 +381,11 @@ function updateShirtTx(x, y, color, radius) {
 
             if (dx * dx + dy * dy <= rSquared) {
                 const index = (py * width + px) * 4;
+
+                // if(dy % 2 == 0 || dx %2 == 0) {
+                //     continue;
+                // } // airbrush?
+
                 if(activeShirtSide == "FRONT") {
                     shirtData[index + 0] = color.x;
                     shirtData[index + 1] = color.y;
@@ -517,6 +573,7 @@ document.addEventListener('mousemove', function(event) {
     shirtDesignerMat.uniforms.brushSize.value = brushRadius;
     const brushColor = new THREE.Vector3(brushColorR, brushColorG, brushColorB);
     shirtDesignerMat.uniforms.brushColor.value = brushColor;
+    paintBucketMat.uniforms.brushColor.value = brushColor;
 
     if(designerTrackingMouse == true && drawing == true) {
 
@@ -751,6 +808,7 @@ document.querySelectorAll('.eyeTextureOption').forEach(el => {
     el.addEventListener('click', () => {
       const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
       updateTexture('eyes', textureFile);
+      console.warn("UPDATING TEXTURE");
     });
 });
 
