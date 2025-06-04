@@ -786,7 +786,7 @@ const updateTexture = (bodyPart, txPath) => {
 
 document.querySelectorAll('.eyeTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
       updateTexture('eyes', textureFile);
       console.warn("UPDATING TEXTURE");
     });
@@ -794,14 +794,14 @@ document.querySelectorAll('.eyeTextureOption').forEach(el => {
 
 document.querySelectorAll('.noseTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
       updateTexture('nose', textureFile);
     });
 });
 
 document.querySelectorAll('.mouthTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '');
+      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
       updateTexture('mouth', textureFile);
     });
 });
