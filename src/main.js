@@ -104,10 +104,6 @@ var personShirtPosition = new THREE.Vector3();
 var personMouthPosition = new THREE.Vector3();
 var personNosePosition = new THREE.Vector3();
 
-var bodyColorRSlider = document.getElementById("bodyColorR");
-var bodyColorGSlider = document.getElementById("bodyColorG");
-var bodyColorBSlider = document.getElementById("bodyColorB");
-
 var eyeSizeSlider = document.getElementById("eyeSizeInput");
 var eyeDistSlider = document.getElementById("eyeDistApartInput");
 var eyesYSlider = document.getElementById("eyesYInput");
@@ -120,10 +116,23 @@ var noseSizeSlider = document.getElementById("noseSizeInput");
 var noseYSlider = document.getElementById("noseYInput");
 
 var uniforms = {
-    bodyRColor: { value: 0.0 },
-    bodyGColor: { value: 0.0 },
-    bodyBColor: { value: 0.0 },
+    bodyRColor: { value: 0.1 },
+    bodyGColor: { value: 0.2 },
+    bodyBColor: { value: 0.4 },
 }
+
+function updateBodyColor(event) {
+    let bodyColorHex = event.target.value.replace("#", "0x");
+    const bodyColorFromHex = new THREE.Color().setHex(bodyColorHex);
+    const bodyColor = new THREE.Vector3(bodyColorFromHex.r, bodyColorFromHex.g, bodyColorFromHex.b);
+    uniforms.bodyRColor.value = bodyColorFromHex.r;
+    uniforms.bodyGColor.value = bodyColorFromHex.g;
+    uniforms.bodyBColor.value = bodyColorFromHex.b;
+}
+
+var bodyColorPicker = document.getElementById("bodyColorPicker");
+bodyColorPicker.addEventListener("input", updateBodyColor);
+bodyColorPicker.addEventListener("change", updateBodyColor);
 
 var personShaderMaterial = new THREE.ShaderMaterial({
     uniforms,
@@ -405,27 +414,6 @@ function updateShirtTx(x, y, color, radius) {
 
 }
 
-bodyColorRSlider.oninput = function() {
-    if(personModel) {
-        personShaderMaterial.uniforms.bodyRColor.value = (this.value / 100.0);
-        document.getElementById("body-color-r-value").innerHTML = personShaderMaterial.uniforms.bodyRColor.value;
-    }
-}
-
-bodyColorGSlider.oninput = function() {
-    if(personModel) {
-        personShaderMaterial.uniforms.bodyGColor.value = (this.value / 100.0);
-        document.getElementById("body-color-g-value").innerHTML = personShaderMaterial.uniforms.bodyGColor.value;
-    }
-}
-
-bodyColorBSlider.oninput = function() {
-    if(personModel) {
-        personShaderMaterial.uniforms.bodyBColor.value = (this.value / 100.0);
-        document.getElementById("body-color-b-value").innerHTML = personShaderMaterial.uniforms.bodyBColor.value;
-    }
-}
-
 eyeSizeSlider.oninput = function() {
     if(eyeLeft && eyeRight) {
         var newScale = baseEyeSize + (this.value * .01);
@@ -525,9 +513,6 @@ shirtDesignerRendererCanvas.addEventListener('mouseleave', function() {
 
 var brushRadius = 6;
 var brushSizeInput = document.getElementById("brushSizeInput");
-var brushColorRInput = document.getElementById("brushColorRValueInput");
-var brushColorGInput = document.getElementById("brushColorGValueInput");
-var brushColorBInput = document.getElementById("brushColorBValueInput");
 var designerClearButton = document.getElementById("designerClearButton");
 
 designerClearButton.addEventListener("click", function() {
@@ -545,19 +530,13 @@ brushSizeInput.oninput = function() {
     brushRadius = this.value;
 }
 
-var brushColorR = 0; // brushColorRValueInput
-var brushColorG = 0;
-var brushColorB = 0;
-brushColorRInput.oninput = function() {
-    brushColorR = this.value / 255;
-}
+brushColorInput.addEventListener("input", updateBrushColor);
+brushColorInput.addEventListener("change", updateBrushColor);
 
-brushColorGInput.oninput = function() {
-    brushColorG = this.value / 255;
-}
+var brushColorHex = "";
 
-brushColorBInput.oninput = function() {
-    brushColorB = this.value / 255;
+function updateBrushColor(event) {
+    brushColorHex = event.target.value.replace("#", "0x");
 }
 
 document.addEventListener('mousemove', function(event) {
@@ -571,7 +550,8 @@ document.addEventListener('mousemove', function(event) {
     shirtDesignerMat.uniforms.mouseX.value = x;
     shirtDesignerMat.uniforms.mouseY.value = rect.height - y;
     shirtDesignerMat.uniforms.brushSize.value = brushRadius;
-    const brushColor = new THREE.Vector3(brushColorR, brushColorG, brushColorB);
+    const brushColorFromHex = new THREE.Color().setHex(brushColorHex);
+    const brushColor = new THREE.Vector3(brushColorFromHex.r, brushColorFromHex.g, brushColorFromHex.b);
     shirtDesignerMat.uniforms.brushColor.value = brushColor;
     paintBucketMat.uniforms.brushColor.value = brushColor;
 

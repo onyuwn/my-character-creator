@@ -21,6 +21,7 @@ body {
 
 .character-attribute-control-container {
     display: flex;
+    align-items: center;
 }
 
 .tab-container {
@@ -38,7 +39,7 @@ body {
     box-shadow: inset -4px -8px 10px rgb(4, 51, 0);
 }
 
-.tab-content {
+.tab-content, #clothes-options {
     display: flex;
 }
 
@@ -105,7 +106,7 @@ p {
     outline: 1px dashed red;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    height: 500px;
+    height: 700px;
 }
 
 #shirtDesigner {
@@ -126,4 +127,9 @@ p {
 
 #designerControls p {
     cursor: pointer;
+}
+
+#brushColorInput {
+    width: 100px;
+    height: 100px;
 }

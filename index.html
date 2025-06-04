@@ -44,19 +44,12 @@
             <div class="tab-content" id="body-controls">
                 <div class="col">
                     <div class="character-attribute-control-container">
-                        <p>BODY COLOR R</p>
-                        <input value="0" type="range" id="bodyColorR" />
-                        <p id="body-color-r-value" class="attValue"></p>
+                        <p>BODY COLOR</p>
+                        <input id="bodyColorPicker" type="color" />
                     </div>
                     <div class="character-attribute-control-container">
-                        <p>BODY COLOR G</p>
-                        <input value="0" type="range" id="bodyColorG" />
-                        <p id="body-color-g-value" class="attValue"></p>
-                    </div>
-                    <div class="character-attribute-control-container">
-                        <p>BODY COLOR B</p>
-                        <input value="0" type="range" id="bodyColorB" />
-                        <p id="body-color-b-value" class="attValue"></p>
+                        <p>BODY WIDTH</p>
+                        <input type="range" value="0" min="0" max="2" />
                     </div>
                 </div>
             </div>
@@ -146,42 +139,17 @@
                 </div>
             </div>
             <div class="tab-content" id="clothes-controls">
-                <div class="col">
-                    <div class="character-attribute-control-container">
-                        <p>SHIRT SIZE</p>
-                        <input value="0" type="range" id="shirtSizeInput" />
-                        <p id="shirt-size-value" class="attValue">0</p>
-                    </div>
-                    <div class="character-attribute-control-container">
-                        <p>BRUSH SIZE</p>
-                        <input value="6" min="0" max="100" type="range" id="brushSizeInput" />
-                        <p id="brush-size-value" class="attValue">0</p>
-                    </div>
-                    <div class="character-attribute-control-container">
-                        <p>BRUSH COLOR R</p>
-                        <input value="0" min="0" max="255" type="range" id="brushColorRValueInput" />
-                        <p id="brush-color-r-value" class="attValue">0</p>
-                    </div>
-                    <div class="character-attribute-control-container">
-                        <p>BRUSH COLOR G</p>
-                        <input value="0" min="0" max="255" type="range" id="brushColorGValueInput" />
-                        <p id="brush-color-g-value" class="attValue">0</p>
-                    </div>
-                    <div class="character-attribute-control-container">
-                        <p>BRUSH COLOR B</p>
-                        <input value="0" min="0" max="255" type="range" id="brushColorBValueInput" />
-                        <p id="brush-color-b-value" class="attValue">0</p>
-                    </div>
-                </div>
-                <div id="nose-selection-container" class="col">
-                    <div class="topStyleOption textureOption">
-                        <img src="/shirt.png" />
-                    </div>
-                    <div class="topStyleOption textureOption">
-                        <img src="/dress.png" />
-                    </div>
-                    <div class="topStyleOption textureOption">
-                        <img src="/noneOption.png" />
+                <div id="clothes-selection-container" class="col">
+                    <div id="clothes-options">
+                        <div class="topStyleOption textureOption">
+                            <img src="/shirt.png" />
+                        </div>
+                        <div class="topStyleOption textureOption">
+                            <img src="/dress.png" />
+                        </div>
+                        <div class="topStyleOption textureOption">
+                            <img src="/noneOption.png" />
+                        </div>
                     </div>
                     <div id="shirtDesignerContainer">
                         <canvas id="shirtDesigner"></canvas>
@@ -190,6 +158,15 @@
                         <div id="clothesSideToggle">
                             <div id="clothesFrontButton" class="clothesSideSelection"><p>FRONT</p></div>
                             <div id="clothesBackButton" class="clothesSideSelection"><p>BACK</p></div>
+                        </div>
+                        <div class="character-attribute-control-container">
+                            <p>BRUSH COLOR</p>
+                            <input type="color" id="brushColorInput" />
+                        </div>
+                        <div class="character-attribute-control-container">
+                            <p>BRUSH SIZE</p>
+                            <input value="6" min="0" max="100" type="range" id="brushSizeInput" />
+                            <p id="brush-size-value" class="attValue">0</p>
                         </div>
                         <div id="designerClearButton" class="clothesSideSelection"><p>CLEAR</p></div>
                     </div>
