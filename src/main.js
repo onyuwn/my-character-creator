@@ -55,12 +55,6 @@ designerRenderer.setSize(shirtDesignerRendererCanvas.clientWidth, shirtDesignerR
 
 const shirtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -.2, 10);
 var appContainer = document.getElementById("app-container");
-//appContainer.insertBefore(renderer.domElement, appContainer.firstChild);
-
-// const geometry = new THREE.BoxGeometry();
-// const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
-// const cube = new THREE.Mesh(geometry, material);
-// scene.add(cube);
 
 const geometry = new THREE.PlaneGeometry();
 const shirtDesignerGeometry = new THREE.PlaneGeometry(2,2);
@@ -250,7 +244,7 @@ const shirtMat = new THREE.ShaderMaterial({
                 gl_FragColor = vec4(color, 1.0);
             } else {
                 vec3 color = texture2D(shirtTx, vUv).rgb;
-                gl_FragColor = vec4(color, 1.0);
+                gl_FragColor = texture2D(shirtTx, vUv);
             }
         }
     `,
@@ -291,7 +285,7 @@ const shirtDesignerMat = new THREE.ShaderMaterial({
                 gl_FragColor = vec4(color, 1.0);
             } else {
                 color = texture2D(shirtTx, vUv).rgb;
-                gl_FragColor = vec4(color, 1.0);
+                gl_FragColor = texture2D(shirtTx, vUv);
             }
 
             float dMouse = abs(distance(gl_FragCoord.xy, vec2(mouseX, mouseY)));
@@ -395,6 +389,8 @@ function updateShirtTx(x, y, color, radius) {
                 //     continue;
                 // } // airbrush?
 
+                // var alpha = 1 - (((dx * dx + dy * dy) / 2) / radius);
+                // alpha += .5;
                 if(activeShirtSide == "FRONT") {
                     shirtData[index + 0] = color.x;
                     shirtData[index + 1] = color.y;
@@ -786,22 +782,33 @@ const updateTexture = (bodyPart, txPath) => {
 
 document.querySelectorAll('.eyeTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
-      updateTexture('eyes', textureFile);
-      console.warn("UPDATING TEXTURE");
+        const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
+        updateTexture('eyes', textureFile);
+        document.querySelectorAll('.eyeTextureOption').forEach(el2 => {
+            el2.classList.remove("selected");
+        });
+        el.classList.add("selected");
     });
 });
 
 document.querySelectorAll('.noseTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
-      updateTexture('nose', textureFile);
+        const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
+        updateTexture('nose', textureFile);
+        document.querySelectorAll('.noseTextureOption').forEach(el2 => {
+            el2.classList.remove("selected");
+        });
+        el.classList.add("selected");
     });
 });
 
 document.querySelectorAll('.mouthTextureOption').forEach(el => {
     el.addEventListener('click', () => {
-      const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
-      updateTexture('mouth', textureFile);
+        const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
+        updateTexture('mouth', textureFile);
+        document.querySelectorAll('.mouthTextureOption').forEach(el2 => {
+            el2.classList.remove("selected");
+        });
+        el.classList.add("selected");
     });
 });

@@ -103,15 +103,15 @@ p {
 }
 
 #shirtDesignerContainer {
-    outline: 1px dashed red;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
     height: 700px;
 }
 
 #shirtDesigner {
+    outline: 1px dashed red;
     height: 100%;
-    width:100%;
+    aspect-ratio: 1 / 1;
 }
 
 #clothesSideToggle {
