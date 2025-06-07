@@ -370,9 +370,9 @@ function updateShirtTx(x, y, color, radius) {
     var height = shirtDesignerRendererCanvas.clientHeight;
     var flippedY = shirtDesignerRendererCanvas.clientHeight - y - 1;
 
-    const startX = Math.max(0, x - radius);
+    const startX = Math.max(1, x - radius);
     const endX = Math.min(width - 1, x + radius);
-    const startY = Math.max(0, flippedY - radius);
+    const startY = Math.max(1, flippedY - radius);
     const endY = Math.min(height - 1, flippedY + radius);
     
     const rSquared = radius * radius;
