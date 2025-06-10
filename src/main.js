@@ -780,6 +780,10 @@ const updateTexture = (bodyPart, txPath) => {
     }
 }
 
+function updateBrush(brushType) {
+    console.warn(brushType);
+}
+
 document.querySelectorAll('.eyeTextureOption').forEach(el => {
     el.addEventListener('click', () => {
         const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
@@ -807,6 +811,17 @@ document.querySelectorAll('.mouthTextureOption').forEach(el => {
         const textureFile = el.querySelector('img').getAttribute('src').replace('/', '../');
         updateTexture('mouth', textureFile);
         document.querySelectorAll('.mouthTextureOption').forEach(el2 => {
+            el2.classList.remove("selected");
+        });
+        el.classList.add("selected");
+    });
+});
+
+document.querySelectorAll('.designerToolButton').forEach(el => {
+    el.addEventListener('click', () => {
+        const selectedToolName = el.getAttribute('data-tool-name')
+        updateBrush(selectedToolName);
+        document.querySelectorAll('.designerToolButton').forEach(el2 => {
             el2.classList.remove("selected");
         });
         el.classList.add("selected");

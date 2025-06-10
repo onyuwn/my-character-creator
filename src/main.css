@@ -24,12 +24,12 @@ body {
     align-items: center;
 }
 
-.tab-container {
+.tab-container, .designerToolButton {
     display: flex;
     background-color: rgb(229, 255, 0);
 }
 
-.tab {
+.tab, .designerToolButton {
     margin: 2px;
     padding:1px;
     padding-left:4px;
@@ -88,6 +88,7 @@ p {
 
 .selected { 
     outline: dashed 3px green;
+    background-color: red;
     opacity: 1;
 }
 
@@ -111,6 +112,7 @@ p {
     grid-column: 1 / 4;
     width: 100%;
     height: 700px;
+    display:flex;
 }
 
 #shirtDesigner {
@@ -137,4 +139,9 @@ p {
 #brushColorInput {
     width: 100px;
     height: 100px;
+}
+
+#toolBox {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
 }
